@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDCap Delphi Module — Discussion Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- Navigation between pages -->
+  <nav class="page-links">
+    <a href="plan.html" class="active">Discussion Plan</a>
+    <a href="architecture.html">Full Architecture</a>
+    <a href="glossary.html">Glossary</a>
+  </nav>
+
+  <!-- Hero -->
+  <header class="doc-hero">
+    <h1>REDCap Delphi Module</h1>
+    <div class="subtitle">Extension Plan — Meeting Discussion Document</div>
+    <div class="meta">Prepared for discussion · April 2026 · github.com/dappelbe/REDCap_DelphiModule</div>
+  </header>
+
+  <!-- TOC -->
+  <nav class="doc-nav" id="top">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#today">What the Module Does Today</a></li>
+      <li><a href="#build">What We Want to Build</a></li>
+      <li><a href="#compute">What the Module Will Calculate</a></li>
+      <li><a href="#participants">What Participants Will See</a></li>
+      <li><a href="#config">How Researchers Configure It</a></li>
+      <li><a href="#technical">Technical Approach</a></li>
+      <li><a href="#delivery">Delivery Plan</a></li>
+      <li><a href="#discussion">Discussion Points</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. TODAY -->
+  <section class="section" id="today">
+    <h2>1. What the Module Does Today</h2>
+    <p>The REDCap Delphi Module helps researchers run Delphi surveys inside REDCap. In a Delphi study, participants rate items in Round 1, then in Round 2 they see how the group responded before re-rating.</p>
+
+    <h3>What the module handles well</h3>
+    <ul>
+      <li>Displaying group feedback (averages, distributions) directly inside the Round 2 survey</li>
+      <li>Showing the participant their own previous answer so they can compare</li>
+      <li>Multiple display formats: simple tables, matrix grids, bar charts</li>
+      <li>Separate feedback by stakeholder group (e.g. Patients, Clinicians, Nurses)</li>
+    </ul>
+
+    <h3>What the module does NOT do (the gap)</h3>
+    <ul>
+      <li><strong>No automatic calculations</strong> — researchers must export data to Excel, manually compute averages and distributions, then paste those numbers back into REDCap field-by-field</li>
+      <li><strong>No consensus measurement</strong> — no built-in way to determine if the group has reached agreement</li>
+      <li><strong>No stability tracking</strong> — no way to measure how strong the agreement is</li>
+    </ul>
+
+    <div class="callout-warn callout">
+      <strong>Why this matters:</strong> For a survey with 30 questions and 3 stakeholder groups, a researcher currently has to manually calculate and paste 90+ values. This is time-consuming, error-prone, and must be repeated if any Round 1 data changes.
+    </div>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 2. BUILD -->
+  <section class="section" id="build">
+    <h2>2. What We Want to Build</h2>
+    <p>We want to add an <strong>"auto mode"</strong> to the existing module. When enabled, the module will automatically pull Round 1 data from REDCap, compute all the statistics, and display them — no Excel needed.</p>
+
+    <h3>How it works today vs. how it will work</h3>
+    <table>
+      <tr><th></th><th>Today (Manual Mode)</th><th>Proposed (Auto Mode)</th></tr>
+      <tr><td><strong>Step 1</strong></td><td>Researcher exports Round 1 data from REDCap</td><td>Module reads Round 1 data automatically</td></tr>
+      <tr><td><strong>Step 2</strong></td><td>Researcher opens Excel and calculates averages per group</td><td>Module computes mean, median, mode, IQR, etc. internally</td></tr>
+      <tr><td><strong>Step 3</strong></td><td>Researcher types scores into each question's @DELPHI tag</td><td>Module generates the display values automatically</td></tr>
+      <tr><td><strong>Step 4</strong></td><td>Module displays the manually entered scores</td><td>Module displays the computed scores (same visuals)</td></tr>
+      <tr><td><strong>Consensus?</strong></td><td>Not available</td><td>Module determines if consensus is reached (IN / OUT)</td></tr>
+      <tr><td><strong>If data changes?</strong></td><td>Repeat steps 1–3 manually</td><td>Module recalculates automatically</td></tr>
+    </table>
+
+    <div class="callout-success callout">
+      <strong>The key principle — nothing breaks:</strong> Any project already using the module with manually entered scores will continue to work exactly as before. Auto mode is only activated when a researcher explicitly adds <code>calc: "auto"</code> to their configuration.
+    </div>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 3. COMPUTE -->
+  <section class="section" id="compute">
+    <h2>3. What the Module Will Calculate</h2>
+
+    <h3>3a. Basic Statistics (for every question)</h3>
+    <table>
+      <tr><th>Statistic</th><th>What It Tells You</th><th>Example</th></tr>
+      <tr><td class="term-name">Mean</td><td>The average score across all respondents</td><td>7.2 out of 9</td></tr>
+      <tr><td class="term-name">Median</td><td>The middle score when all responses are sorted</td><td>7</td></tr>
+      <tr><td class="term-name">Mode</td><td>The most frequently chosen score</td><td>8</td></tr>
+      <tr><td class="term-name">IQR</td><td>The spread of the middle 50% of responses (Q3 minus Q1)</td><td>2</td></tr>
+      <tr><td class="term-name">Standard Deviation</td><td>How spread out the responses are overall</td><td>1.4</td></tr>
+      <tr><td class="term-name">Distribution</td><td>How many people chose each score (1, 2, 3, … 9)</td><td>Used for bar charts</td></tr>
+    </table>
+    <p>These statistics are computed both overall and per stakeholder group.</p>
+
+    <h3>3b. Consensus Rules</h3>
+    <p>The module will support several standard Delphi consensus definitions. The researcher picks one rule for their study:</p>
+    <table>
+      <tr><th>Rule</th><th>How It Decides Consensus</th></tr>
+      <tr><td class="term-name">IQR + SD Rule</td><td>Consensus if IQR ≤ 1 AND standard deviation ≤ 1.5</td></tr>
+      <tr><td class="term-name">Range Consensus (2 ranges)</td><td>Divide the scale in half. Consensus if 70%+ of responses fall in one half</td></tr>
+      <tr><td class="term-name">Range Consensus (3 ranges)</td><td>Divide the scale into Low/Medium/High. Consensus if 70%+ fall in one range</td></tr>
+      <tr><td class="term-name">High-Only variants</td><td>Same ranges, but only the "High" range counts for consensus</td></tr>
+      <tr><td class="term-name">70/15 Rule</td><td>Consensus IN if 70%+ score High AND fewer than 15% score Low</td></tr>
+      <tr><td class="term-name">Majority</td><td>Consensus if one choice gets more than 50% (absolute) or the most votes (simple)</td></tr>
+    </table>
+    <p>Each rule produces a clear result: <span class="badge badge-in">IN</span> (consensus reached), <span class="badge badge-out">OUT</span> (consensus not reached), or <span class="badge badge-und">UNDETERMINED</span>.</p>
+
+    <h3>3c. Stability Metrics</h3>
+    <ul>
+      <li><strong>Coefficient of Variation (CV)</strong> — for rating questions. Lower CV = stronger agreement. Displayed as "Group Stability" percentage.</li>
+      <li><strong>Percentage stability</strong> — for categorical questions. The percentage of people who chose the consensus answer.</li>
+    </ul>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 4. PARTICIPANTS -->
+  <section class="section" id="participants">
+    <h2>4. What Participants Will See</h2>
+    <p>The visual experience for survey participants stays <strong>almost identical</strong> to what they see today. The tables, bar charts, and matrix displays all look the same — the only difference is the numbers are computed automatically instead of typed in manually.</p>
+
+    <p><strong>One addition:</strong> a small coloured badge next to each question's feedback showing the consensus status:</p>
+    <ul>
+      <li><span class="badge badge-in">IN</span> — Green — the group has reached consensus on this item</li>
+      <li><span class="badge badge-out">OUT</span> — Red — the group has not reached consensus</li>
+      <li><span class="badge badge-und">UNDETERMINED</span> — Amber — the result is borderline</li>
+    </ul>
+    <p>This badge is optional — researchers can turn it on or off globally or per question.</p>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 5. CONFIG -->
+  <section class="section" id="config">
+    <h2>5. How Researchers Configure It</h2>
+
+    <h3>5a. Project-Level Settings (set once)</h3>
+    <p>In the External Modules settings page, the researcher sets defaults for the whole project:</p>
+    <table>
+      <tr><th>Setting</th><th>What It Does</th><th>Default</th></tr>
+      <tr><td class="term-name">Stakeholder grouping field</td><td>Which REDCap field identifies the respondent's group</td><td>None (no grouping)</td></tr>
+      <tr><td class="term-name">Consensus rule</td><td>Which consensus definition to use</td><td>IQR + SD</td></tr>
+      <tr><td class="term-name">Threshold</td><td>The percentage required for consensus</td><td>70%</td></tr>
+      <tr><td class="term-name">Exclusion codes</td><td>Values to ignore (e.g. "99" for "I don't know")</td><td>None</td></tr>
+      <tr><td class="term-name">Show consensus badge</td><td>Whether participants see the IN/OUT badge</td><td>Off</td></tr>
+      <tr><td class="term-name">Debug mode</td><td>Shows detailed computation info to admins only</td><td>Off</td></tr>
+    </table>
+
+    <h3>5b. Per-Question Configuration</h3>
+    <p>Each question can override the project defaults using the @DELPHI tag.</p>
+    <p><strong>Manual mode (existing — unchanged):</strong> The researcher types in the scores by hand, exactly as today.</p>
+    <p><strong>Auto mode (new):</strong> The researcher just specifies the Round 1 source field and sets <code>calc</code> to <code>"auto"</code>. No scores needed — the module computes everything.</p>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 6. TECHNICAL -->
+  <section class="section" id="technical">
+    <h2>6. Technical Approach (Simplified)</h2>
+    <p>The extension is built as new PHP classes inside the existing module. No changes to REDCap itself.</p>
+
+    <table>
+      <tr><th>Component</th><th>What It Does</th></tr>
+      <tr><td class="term-name">DataExtractor</td><td>Pulls Round 1 responses from REDCap's database, filters out blanks and exclusion codes, groups by stakeholder</td></tr>
+      <tr><td class="term-name">MetricsEngine</td><td>Computes all the statistics: mean, median, mode, IQR, SD, distributions</td></tr>
+      <tr><td class="term-name">ConsensusRules</td><td>Applies the selected consensus rule and returns IN / OUT / UNDETERMINED</td></tr>
+      <tr><td class="term-name">StabilityMetrics</td><td>Calculates group stability (CV or percentage)</td></tr>
+      <tr><td class="term-name">MetricsCache</td><td>Saves computed results so the module doesn't recalculate on every page load</td></tr>
+      <tr><td class="term-name">Consensus Badge</td><td>Small front-end component that shows the coloured status badge</td></tr>
+    </table>
+
+    <h3>Data flow in auto mode</h3>
+    <div class="flow">
+      <span class="flow-step">Participant opens Round 2</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Module detects <code>calc: "auto"</code></span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">DataExtractor fetches Round 1</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">MetricsEngine computes stats</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">ConsensusRules checks agreement</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Same tables/charts render</span>
+    </div>
+
+    <h3>Safety measures</h3>
+    <ul>
+      <li><strong>No individual data exposed:</strong> Only aggregated statistics reach the browser. No record IDs or individual responses are ever sent to the participant's device.</li>
+      <li><strong>Caching:</strong> Computed results are cached so that a survey page with 30 questions doesn't compute 30 times.</li>
+      <li><strong>Backward compatible:</strong> The manual mode code path is completely untouched.</li>
+    </ul>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 7. DELIVERY -->
+  <section class="section" id="delivery">
+    <h2>7. Delivery Plan</h2>
+    <p>The work is split into 5 milestones. Each one is independently useful and testable:</p>
+
+    <div class="milestone">
+      <span class="milestone-time">1 week</span>
+      <div class="milestone-label">M1: Module Mapped</div>
+      <p>Verify current module works. Produce technical analysis document (done).</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">2–3 weeks</span>
+      <div class="milestone-label">M2: Auto Summaries</div>
+      <p>Module computes mean/median/mode from Round 1 data and displays it. No more Excel for basic stats.</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">2 weeks</span>
+      <div class="milestone-label">M3: Consensus Rules</div>
+      <p>Full set of consensus rules (IQR/SD, Range 2–5, High-only, 70/15, Majority). Each produces IN/OUT status.</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">1–2 weeks</span>
+      <div class="milestone-label">M4: Stability + Badge</div>
+      <p>Group stability metrics. Consensus status badge in the UI. Caching. All project/question settings.</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">1 week</span>
+      <div class="milestone-label">M5: Docs + Release</div>
+      <p>Updated README, demo REDCap project, test suite, version 2.0 release.</p>
+    </div>
+
+    <div class="callout">
+      <strong>Total estimated effort: 7–10 weeks.</strong> Milestone 2 alone eliminates the Excel dependency — it could be released independently while the consensus rules are being built.
+    </div>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- 8. DISCUSSION -->
+  <section class="section" id="discussion">
+    <h2>8. Discussion Points for the Meeting</h2>
+    <ol>
+      <li>Which consensus rules are highest priority? Should we implement all of them or start with a subset (e.g. IQR/SD + Range 3)?</li>
+      <li>Should the consensus badge be visible to participants by default, or only to researchers?</li>
+      <li>What's the preferred default threshold — 70% as per COMET methodology, or study-specific?</li>
+      <li>Is there a preference for how stakeholder groups are identified?</li>
+      <li>Should we support more than one consensus rule per project?</li>
+      <li>Are there any REDCap hosting constraints (PHP version, memory limits)?</li>
+      <li>Would a batch configuration tool (auto-generate @DELPHI tags) be useful for v2.0?</li>
+      <li>Who should be involved in testing the demo project before release?</li>
+    </ol>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+</div>
+</body>
+</html>

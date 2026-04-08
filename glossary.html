@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDCap Delphi Module — Glossary of Terms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <nav class="page-links">
+    <a href="plan.html">Discussion Plan</a>
+    <a href="architecture.html">Full Architecture</a>
+    <a href="glossary.html" class="active">Glossary</a>
+  </nav>
+
+  <header class="doc-hero">
+    <h1>Glossary of Terms</h1>
+    <div class="subtitle">A plain-language dictionary of all technical terms used in the project</div>
+    <div class="meta">REDCap Delphi Module · April 2026</div>
+  </header>
+
+  <nav class="doc-nav" id="top">
+    <h3>Sections</h3>
+    <ol>
+      <li><a href="#delphi">Delphi Method Terms</a></li>
+      <li><a href="#orgs">Organisations, Tools &amp; Platforms</a></li>
+      <li><a href="#central">Central Tendency (Averages)</a></li>
+      <li><a href="#spread">Spread &amp; Dispersion</a></li>
+      <li><a href="#consensus-rules">Consensus Rules</a></li>
+      <li><a href="#consensus-status">Consensus Status</a></li>
+      <li><a href="#stability">Stability &amp; Strength Metrics</a></li>
+      <li><a href="#redcap">REDCap &amp; Technical Terms</a></li>
+      <li><a href="#abbreviations">Abbreviations Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══ DELPHI ═══ -->
+  <section class="section" id="delphi">
+    <h2>1. Delphi Method Terms</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">Delphi Method</td><td>A structured research technique where a panel of experts answer questionnaires over multiple rounds. After each round, they see a summary of the group's responses and can revise their answers. The goal is to converge toward group agreement.</td></tr>
+      <tr><td class="term-name">Delphi Round</td><td>One cycle of the survey. In Round 1, participants give their initial ratings. In Round 2 (and beyond), they see feedback from the previous round and can change their answers.</td></tr>
+      <tr><td class="term-name">Panel / Panellist</td><td>The group of experts participating in the Delphi study. Each individual expert is a panellist.</td></tr>
+      <tr><td class="term-name">Controlled Feedback</td><td>The summary information shown to participants in later rounds. It typically includes group averages and/or distributions, plus the participant's own previous answer. "Controlled" means the researchers decide what feedback to show.</td></tr>
+      <tr><td class="term-name">Anonymity</td><td>A core Delphi principle: participants do not know who else is on the panel or who gave which answer. This prevents dominant individuals from influencing the group.</td></tr>
+      <tr><td class="term-name">Iteration</td><td>The process of repeating rounds. Each round gives participants a chance to reconsider their views in light of the group's responses.</td></tr>
+      <tr><td class="term-name">Stakeholder Group</td><td>A category of participant based on their role or background (e.g. Patients, Clinicians, Nurses). Feedback is often broken down by stakeholder group so participants can see how different perspectives compare.</td></tr>
+      <tr><td class="term-name">Consensus</td><td>When the group reaches sufficient agreement on an item. What counts as "sufficient" depends on the consensus rule being used.</td></tr>
+      <tr><td class="term-name">Dissensus / Disagreement</td><td>When the group has NOT reached agreement. Responses are too spread out to meet the consensus threshold.</td></tr>
+      <tr><td class="term-name">Core Outcome Set (COS)</td><td>A standardised minimum set of outcomes that should be measured and reported in all clinical trials for a specific condition. Delphi surveys are commonly used to develop these.</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ ORGS ═══ -->
+  <section class="section" id="orgs">
+    <h2>2. Organisations, Tools &amp; Platforms</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">REDCap</td><td>Research Electronic Data Capture. A free, secure web application for building and managing online surveys and databases for research studies. Used by 7,950+ institutions in 163 countries.</td></tr>
+      <tr><td class="term-name">External Module (EM)</td><td>A plug-in for REDCap that adds custom functionality without modifying REDCap's core code. The Delphi module is an External Module.</td></tr>
+      <tr><td class="term-name">Action Tag</td><td>A special instruction written in a REDCap field's annotation box (e.g. <code>@DELPHI={...}</code>). It tells the External Module how to behave for that specific question.</td></tr>
+      <tr><td class="term-name">COMET Initiative</td><td>Core Outcome Measures in Effectiveness Trials. An international initiative that brings together people interested in developing and applying core outcome sets. Hosts DelphiManager. URL: comet-initiative.org</td></tr>
+      <tr><td class="term-name">DelphiManager</td><td>A commercial online tool by the COMET Initiative specifically designed for running Delphi surveys for core outcome set development. Paid service.</td></tr>
+      <tr><td class="term-name">eDelphi</td><td>Another commercial software platform for conducting Delphi surveys online. Paid service.</td></tr>
+      <tr><td class="term-name">ExpertLens</td><td>A system developed by RAND for gathering opinions from large groups of experts. Paid service.</td></tr>
+      <tr><td class="term-name">Surveylet / Calibrum</td><td>A commercial Delphi survey platform supporting multiple consensus measurement methods. The consensus metrics reference document describes their approach.</td></tr>
+      <tr><td class="term-name">OCTRU</td><td>Oxford Clinical Trials Research Unit. The research unit at the University of Oxford that developed the original REDCap Delphi Module.</td></tr>
+      <tr><td class="term-name">ECharts</td><td>An open-source JavaScript charting library. Already bundled with the module (version 5.5.6) for rendering bar charts.</td></tr>
+      <tr><td class="term-name">NIHR BRC</td><td>National Institute for Health and Care Research, Biomedical Research Centre. Funds the ongoing development of this module at Oxford.</td></tr>
+      <tr><td class="term-name">RAND</td><td>The US research organisation that originally developed the Delphi method in the 1950s for military forecasting.</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ CENTRAL TENDENCY ═══ -->
+  <section class="section" id="central">
+    <h2>3. Central Tendency (Averages)</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">Mean</td><td>The arithmetic average. Add up all responses and divide by the number of respondents. Example: scores of 3, 5, 7, 8, 7 → mean = 30 ÷ 5 = 6.0. Best for interval/ratio data that is not skewed.</td></tr>
+      <tr><td class="term-name">Median</td><td>The middle value when all responses are sorted from lowest to highest. Example: 3, 5, 7, 7, 8 → median = 7. If even count, it's the average of the two middle values. Best for ordinal data or skewed distributions.</td></tr>
+      <tr><td class="term-name">Mode</td><td>The most frequently chosen value. Example: 3, 5, 7, 7, 8 → mode = 7 (appears twice). Best for nominal/categorical data.</td></tr>
+      <tr><td class="term-name">Consensus Score</td><td>The computed central tendency value (mean, median, or mode depending on the rule selected) that represents the group's collective answer.</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Which average to use?</strong> Nominal data → Mode. Ordinal data → Median. Interval/ratio (not skewed) → Mean. Interval/ratio (skewed) → Median.
+    </div>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ SPREAD ═══ -->
+  <section class="section" id="spread">
+    <h2>4. Spread &amp; Dispersion</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">Standard Deviation (SD)</td><td>A measure of how spread out the responses are from the mean. Low SD = responses cluster tightly. High SD = widely scattered. If mean = 7 and SD = 0.5, most people scored between 6.5 and 7.5.</td></tr>
+      <tr><td class="term-name">Variance</td><td>The square of the standard deviation. Used in calculations but less intuitive than SD for interpretation.</td></tr>
+      <tr><td class="term-name">IQR (Interquartile Range)</td><td>The range of the middle 50% of responses. Calculated as Q3 minus Q1. A small IQR means the middle half of respondents are tightly clustered. Example: IQR = 1 means the middle 50% scored within 1 point of each other.</td></tr>
+      <tr><td class="term-name">Q1 (First Quartile)</td><td>The value below which 25% of responses fall. Also called the 25th percentile.</td></tr>
+      <tr><td class="term-name">Q3 (Third Quartile)</td><td>The value below which 75% of responses fall. Also called the 75th percentile.</td></tr>
+      <tr><td class="term-name">Percentile</td><td>The value below which a given percentage of data falls. The median is the 50th percentile.</td></tr>
+      <tr><td class="term-name">Distribution</td><td>The pattern of how responses are spread across all possible values. Shown as a frequency count and often displayed as a bar chart.</td></tr>
+      <tr><td class="term-name">Range</td><td>The difference between the highest and lowest response values. If scores go from 2 to 9, the range is 7.</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ CONSENSUS RULES ═══ -->
+  <section class="section" id="consensus-rules">
+    <h2>5. Consensus Rules</h2>
+    <table>
+      <tr><th>Rule</th><th>Definition</th></tr>
+      <tr><td class="term-name">IQR ≤ 1 &amp; SD ≤ 1.5</td><td>Consensus is reached if the Interquartile Range is 1 or less AND the Standard Deviation is 1.5 or less. This means the group's responses are tightly clustered. Simple yes/no outcome.</td></tr>
+      <tr><td class="term-name">Range Consensus</td><td>The rating scale is divided into equal ranges. Consensus is reached if a sufficient percentage (typically 70%) of responses fall within any single range.</td></tr>
+      <tr><td class="term-name">Range Consensus 2</td><td>Scale divided into 2 equal ranges (Low/High). Consensus if 70%+ are in either range.</td></tr>
+      <tr><td class="term-name">Range Consensus 3</td><td>Scale divided into 3 ranges (Low/Medium/High). Consensus if 70%+ are in any one range. Most commonly used in COS/Delphi studies.</td></tr>
+      <tr><td class="term-name">Range Consensus 4</td><td>Scale divided into 4 ranges (Very Low / Low / High / Very High).</td></tr>
+      <tr><td class="term-name">Range Consensus 5</td><td>Scale divided into 5 ranges (Very Low / Low / Neutral / High / Very High).</td></tr>
+      <tr><td class="term-name">High-Only Variant</td><td>A variation where only the highest range counts. Consensus is only reached if 70%+ are in the "High" or "Very High" range. Used to identify items with strong positive agreement.</td></tr>
+      <tr><td class="term-name">70/15 Rule</td><td>Consensus IN if 70%+ score in the High range (e.g. 7–9 on a 1–9 scale) AND fewer than 15% score in the Low range (1–3). Commonly used in COS Delphi studies.</td></tr>
+      <tr><td class="term-name">70/15 Bidirectional</td><td>Extension: also defines consensus OUT when fewer than 15% score High AND 70%+ score Low. Items meeting neither condition are UNDETERMINED.</td></tr>
+      <tr><td class="term-name">Majority</td><td>Consensus based on vote counting. Absolute majority: one choice gets &gt; 50%. Simple majority: one choice gets more votes than any other (plurality).</td></tr>
+      <tr><td class="term-name">Consensus Threshold</td><td>The percentage of agreement required for consensus. Typically 70% but configurable. If set to 75%, then 75% of responses must fall within the target range.</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ CONSENSUS STATUS ═══ -->
+  <section class="section" id="consensus-status">
+    <h2>6. Consensus Status</h2>
+    <table>
+      <tr><th>Status</th><th>Meaning</th><th>Badge</th></tr>
+      <tr><td class="term-name">IN / Agreement / Consent</td><td>The item has reached consensus. The group sufficiently agrees, according to the selected rule and threshold.</td><td><span class="badge badge-in">IN</span></td></tr>
+      <tr><td class="term-name">OUT / Disagreement / Dissent</td><td>The item has NOT reached consensus. Responses are too spread out or do not meet the threshold.</td><td><span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">UNDETERMINED / Undecided</td><td>The result is borderline or the rule produces a third state (e.g. bidirectional rules where the item is neither clearly agreed nor clearly disagreed upon).</td><td><span class="badge badge-und">UNDETERMINED</span></td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ STABILITY ═══ -->
+  <section class="section" id="stability">
+    <h2>7. Stability &amp; Strength Metrics</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">Group Stability</td><td>A measure of how strong the consensus is. Even if consensus is reached, stability tells you whether it's a strong or weak agreement. Expressed as a percentage: higher = stronger.</td></tr>
+      <tr><td class="term-name">Coefficient of Variation (CV)</td><td>Standard deviation divided by the mean, as a percentage. Measures spread relative to the average. Used for rating/ordinal questions. Group Stability = 100% − CV.</td></tr>
+      <tr><td class="term-name">CV over Range (CVR)</td><td>A variant of CV for numeric entry questions. Standard deviation divided by the full possible range (max − min). Used when the mean could be zero or negative.</td></tr>
+      <tr><td class="term-name">Percentage Stability</td><td>For categorical questions: the percentage of respondents who chose the consensus answer. If 80% chose the same option, percentage stability is 80%.</td></tr>
+      <tr><td class="term-name">Stability Threshold</td><td>The minimum group stability required for consensus to be confirmed. If threshold is 50% and stability is only 35%, consensus is NOT confirmed.</td></tr>
+      <tr><td class="term-name">Round-to-Round Stability</td><td>Comparing responses between rounds to see if opinions are converging or diverging. Not yet implemented but the architecture supports it.</td></tr>
+    </table>
+
+    <h3>Worked Example</h3>
+    <p>7 respondents rate an item on a 1–5 scale with scores: 1, 1, 3, 3, 5, 1, 2</p>
+    <table>
+      <tr><th>Step</th><th>Value</th></tr>
+      <tr><td class="term-name">Mean</td><td>16 ÷ 7 = 2.29</td></tr>
+      <tr><td class="term-name">Standard Deviation</td><td>1.50</td></tr>
+      <tr><td class="term-name">CV</td><td>1.50 ÷ 2.29 = 65.5%</td></tr>
+      <tr><td class="term-name">Group Stability</td><td>100% − 65.5% = 34.5%</td></tr>
+      <tr><td class="term-name">Threshold</td><td>50%</td></tr>
+      <tr><td class="term-name">Result</td><td>34.5% &lt; 50% → <span class="badge badge-out">Consensus NOT confirmed</span></td></tr>
+    </table>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ REDCAP TERMS ═══ -->
+  <section class="section" id="redcap">
+    <h2>8. REDCap &amp; Technical Terms</h2>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="term-name">Instrument / Form</td><td>A questionnaire or data collection form within a REDCap project. Each Delphi round is typically a separate instrument.</td></tr>
+      <tr><td class="term-name">Event</td><td>In REDCap's longitudinal design, an event represents a time point or study phase. Round 1 and Round 2 are typically separate events.</td></tr>
+      <tr><td class="term-name">Record</td><td>A single participant's data in REDCap. Each panellist has one record containing their responses across all rounds.</td></tr>
+      <tr><td class="term-name">Field</td><td>A single question or data point within an instrument.</td></tr>
+      <tr><td class="term-name">Radio Button</td><td>An input where the respondent selects exactly one option. The Delphi module requires rating questions to use radio buttons.</td></tr>
+      <tr><td class="term-name">Matrix Question</td><td>A grid layout where multiple related questions share the same answer options. Displayed as rows with shared column headers.</td></tr>
+      <tr><td class="term-name">Likert Scale</td><td>A rating scale where respondents indicate their level of agreement or importance. Common scales: 1–5, 1–7, 1–9, 0–10.</td></tr>
+      <tr><td class="term-name">Piping</td><td>REDCap's syntax for referencing data from other fields or events, written as <code>[event_name][field_name]</code>.</td></tr>
+      <tr><td class="term-name">@DELPHI Tag</td><td>The action tag used to configure the Delphi module for a specific question. Contains JSON specifying display type, data source, groups, and calculation settings.</td></tr>
+      <tr><td class="term-name">preRound</td><td>A setting in the @DELPHI tag that tells the module where to find the participant's Round 1 answer. Uses REDCap piping syntax.</td></tr>
+      <tr><td class="term-name">calc</td><td>A new setting: <code>"manual"</code> (default, current behaviour) or <code>"auto"</code> (compute statistics automatically).</td></tr>
+      <tr><td class="term-name">Hook</td><td>A point in REDCap's page rendering where an External Module can inject custom code.</td></tr>
+      <tr><td class="term-name">Control Center</td><td>REDCap's administration area where system-wide settings are managed.</td></tr>
+      <tr><td class="term-name">PHP</td><td>The programming language REDCap and its External Modules are written in.</td></tr>
+      <tr><td class="term-name">JavaScript (JS)</td><td>The programming language that runs in the web browser. Used to render charts and manipulate the survey page.</td></tr>
+      <tr><td class="term-name">JSON</td><td>JavaScript Object Notation. A lightweight data format for configuration and data exchange. Example: <code>{"type": "single", "calc": "auto"}</code></td></tr>
+      <tr><td class="term-name">Cache</td><td>A temporary store for computed results so the module doesn't recalculate on every page load.</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ ABBREVIATIONS ═══ -->
+  <section class="section" id="abbreviations">
+    <h2>9. Abbreviations Quick Reference</h2>
+    <table>
+      <tr><th>Abbreviation</th><th>Full Form</th></tr>
+      <tr><td class="term-name">BRC</td><td>Biomedical Research Centre</td></tr>
+      <tr><td class="term-name">COMET</td><td>Core Outcome Measures in Effectiveness Trials</td></tr>
+      <tr><td class="term-name">COS</td><td>Core Outcome Set</td></tr>
+      <tr><td class="term-name">CV</td><td>Coefficient of Variation</td></tr>
+      <tr><td class="term-name">CVR</td><td>Coefficient of Variation over Range</td></tr>
+      <tr><td class="term-name">EM</td><td>External Module (REDCap plug-in)</td></tr>
+      <tr><td class="term-name">IQR</td><td>Interquartile Range</td></tr>
+      <tr><td class="term-name">JS</td><td>JavaScript</td></tr>
+      <tr><td class="term-name">NIHR</td><td>National Institute for Health and Care Research</td></tr>
+      <tr><td class="term-name">OCTRU</td><td>Oxford Clinical Trials Research Unit</td></tr>
+      <tr><td class="term-name">PHP</td><td>PHP: Hypertext Preprocessor</td></tr>
+      <tr><td class="term-name">Q1</td><td>First Quartile (25th percentile)</td></tr>
+      <tr><td class="term-name">Q3</td><td>Third Quartile (75th percentile)</td></tr>
+      <tr><td class="term-name">RAND</td><td>Research and Development (US think tank)</td></tr>
+      <tr><td class="term-name">REDCap</td><td>Research Electronic Data Capture</td></tr>
+      <tr><td class="term-name">SD</td><td>Standard Deviation</td></tr>
+    </table>
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+</div>
+</body>
+</html>

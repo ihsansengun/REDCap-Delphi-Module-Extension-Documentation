@@ -1,0 +1,417 @@
+/* ═══════════════════════════════════════════════════════
+   REDCap Delphi Module — Documentation Styles
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --navy: #0f2b46;
+  --blue: #1a6fb5;
+  --blue-light: #e8f2fc;
+  --blue-mid: #2e86c1;
+  --sky: #d4e9f7;
+  --ink: #1e293b;
+  --text: #334155;
+  --muted: #64748b;
+  --border: #cbd5e1;
+  --surface: #f8fafc;
+  --white: #ffffff;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --red: #dc2626;
+  --red-bg: #fee2e2;
+  --amber: #d97706;
+  --amber-bg: #fef3c7;
+  --code-bg: #f1f5f9;
+  --code-text: #be185d;
+  --font-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--surface);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ── */
+.page-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Header / Hero ── */
+.doc-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #163d5e 50%, var(--blue) 100%);
+  color: var(--white);
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.doc-hero h1 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.doc-hero .subtitle {
+  font-size: 1.15rem;
+  opacity: 0.85;
+  font-weight: 400;
+  position: relative;
+}
+
+.doc-hero .meta {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  position: relative;
+}
+
+/* ── Navigation ── */
+.doc-nav {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.doc-nav h3 {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.doc-nav ol {
+  padding-left: 1.2rem;
+}
+
+.doc-nav li {
+  margin-bottom: 0.35rem;
+}
+
+.doc-nav a {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.doc-nav a:hover {
+  text-decoration: underline;
+}
+
+/* ── Sections ── */
+.section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2rem 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section h2 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  color: var(--navy);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--sky);
+}
+
+.section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--blue);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.section h4 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* ── Text ── */
+p {
+  margin-bottom: 0.85rem;
+}
+
+strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+em {
+  color: var(--muted);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+/* ── Lists ── */
+ul, ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+  line-height: 1.65;
+}
+
+li strong {
+  color: var(--navy);
+}
+
+/* ── Tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.25rem;
+  font-size: 0.92rem;
+}
+
+th {
+  background: var(--navy);
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.7rem 1rem;
+}
+
+th:first-child { border-radius: 6px 0 0 0; }
+th:last-child  { border-radius: 0 6px 0 0; }
+
+td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tr:nth-child(even) td {
+  background: var(--surface);
+}
+
+tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+tr:last-child td:last-child  { border-radius: 0 0 6px 0; }
+
+/* ── Glossary term rows ── */
+.term-name {
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+  min-width: 160px;
+  background: var(--blue-light) !important;
+}
+
+/* ── Code blocks ── */
+pre {
+  background: var(--ink);
+  color: #e2e8f0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin: 1rem 0 1.25rem;
+}
+
+pre .comment { color: #64748b; }
+pre .keyword { color: #7dd3fc; }
+pre .string  { color: #86efac; }
+pre .key     { color: #fbbf24; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 4px;
+  font-size: 0.82em;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.badge-in   { background: var(--green-bg); color: var(--green); }
+.badge-out  { background: var(--red-bg);   color: var(--red); }
+.badge-und  { background: var(--amber-bg); color: var(--amber); }
+
+/* ── Callout boxes ── */
+.callout {
+  border-left: 4px solid var(--blue);
+  background: var(--blue-light);
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1rem 0 1.25rem;
+}
+
+.callout-warn {
+  border-left-color: var(--amber);
+  background: var(--amber-bg);
+}
+
+.callout-success {
+  border-left-color: var(--green);
+  background: var(--green-bg);
+}
+
+/* ── Flow diagram ── */
+.flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 1.25rem;
+  font-size: 0.9rem;
+}
+
+.flow-step {
+  background: var(--blue-light);
+  border: 1px solid var(--sky);
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+.flow-arrow {
+  color: var(--blue);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* ── Milestone cards ── */
+.milestone {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--blue);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  background: var(--white);
+}
+
+.milestone-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.milestone-time {
+  font-size: 0.8rem;
+  color: var(--muted);
+  float: right;
+  font-weight: 600;
+}
+
+.milestone p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* ── Back to top ── */
+.back-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--blue);
+}
+
+/* ── Page links bar ── */
+.page-links {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-links a {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--sky);
+  border-radius: 6px;
+  background: var(--blue-light);
+  transition: background 0.2s;
+}
+
+.page-links a:hover {
+  background: var(--sky);
+}
+
+.page-links a.active {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .page-wrapper { padding: 1rem; }
+  .doc-hero { padding: 2rem 1.25rem; }
+  .doc-hero h1 { font-size: 1.6rem; }
+  .section { padding: 1.25rem; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 0.5rem 0.6rem; }
+  .flow { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+  .page-links { flex-direction: column; }
+}
+
+/* ── Print ── */
+@media print {
+  body { background: white; }
+  .page-wrapper { max-width: 100%; }
+  .doc-hero { break-after: page; }
+  .section { break-inside: avoid; border: none; padding: 1rem 0; }
+  .doc-nav { display: none; }
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDCap Delphi Module — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 640px) {
+      .cards { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 20px rgba(26, 111, 181, 0.12);
+      transform: translateY(-2px);
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+    }
+    .card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+    .card-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .card-link::after {
+      content: '→';
+    }
+    .index-hero {
+      text-align: center;
+      padding: 3.5rem 2rem;
+    }
+    .index-hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .index-hero .subtitle {
+      font-size: 1.2rem;
+    }
+    .repo-link {
+      display: inline-block;
+      margin-top: 2.5rem;
+      padding: 0.6rem 1.5rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .repo-link:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .footer-text {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <header class="doc-hero index-hero">
+    <h1>REDCap Delphi Module</h1>
+    <div class="subtitle">Extension Documentation</div>
+    <div class="meta">Auto-Calculation Engine · Version 2.0 Proposal · April 2026</div>
+  </header>
+
+  <div class="cards">
+
+    <a href="plan.html" class="card">
+      <div class="card-icon">📋</div>
+      <h3>Discussion Plan</h3>
+      <p>A simple, human-readable overview of what we're building and why. Written for meeting discussions — no code, just the what, why, and how.</p>
+      <span class="card-link">Read the plan</span>
+    </a>
+
+    <a href="architecture.html" class="card">
+      <div class="card-icon">🏗️</div>
+      <h3>Full Architecture</h3>
+      <p>Comprehensive technical analysis of the current module and step-by-step implementation plan with code samples, JSON contracts, and file-level breakdown.</p>
+      <span class="card-link">Read the architecture</span>
+    </a>
+
+    <a href="glossary.html" class="card">
+      <div class="card-icon">📖</div>
+      <h3>Glossary of Terms</h3>
+      <p>Plain-language dictionary of 70+ terms covering the Delphi method, statistics, consensus rules, REDCap concepts, and all abbreviations used in the project.</p>
+      <span class="card-link">Read the glossary</span>
+    </a>
+
+  </div>
+
+  <div style="text-align:center; margin-top: 2.5rem;">
+    <a href="https://github.com/dappelbe/REDCap_DelphiModule" class="repo-link">View Repository on GitHub</a>
+  </div>
+
+  <div class="footer-text">
+    REDCap Delphi Module · OCTRU, University of Oxford · Licensed under GPL-3.0
+  </div>
+
+</div>
+</body>
+</html>

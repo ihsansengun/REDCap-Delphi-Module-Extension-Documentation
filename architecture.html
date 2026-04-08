@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDCap Delphi Module — Full Architecture &amp; Implementation Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <nav class="page-links">
+    <a href="plan.html">Discussion Plan</a>
+    <a href="architecture.html" class="active">Full Architecture</a>
+    <a href="glossary.html">Glossary</a>
+  </nav>
+
+  <header class="doc-hero">
+    <h1>REDCap Delphi Module</h1>
+    <div class="subtitle">Architecture Analysis &amp; Auto-Calculation Extension Plan</div>
+    <div class="meta">Version 1.3 (current) → 2.0 (proposed) · April 2026</div>
+  </header>
+
+  <nav class="doc-nav" id="top">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#overview">High-Level Architecture Overview</a></li>
+      <li><a href="#file-analysis">File-Level Analysis</a></li>
+      <li><a href="#integration">REDCap Integration Points</a></li>
+      <li><a href="#implementation">Step-by-Step Implementation</a></li>
+      <li><a href="#visualisation">Visualisation &amp; UX Improvements</a></li>
+      <li><a href="#testing">Testing Strategy</a></li>
+      <li><a href="#risks">Risks &amp; Constraints</a></li>
+      <li><a href="#timeline">Milestone Timeline</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══ 1. OVERVIEW ═══ -->
+  <section class="section" id="overview">
+    <h2>1. High-Level Architecture Overview</h2>
+
+    <h3>1.1 Current Architecture (v1.3)</h3>
+    <p>The REDCap Delphi Module is a <strong>presentation-only feedback layer</strong>. It reads manually pre-computed group scores from <code>@DELPHI</code> action tags and renders them as tables or bar charts. No statistical computation occurs inside the module.</p>
+
+    <h4>Current Data Flow</h4>
+    <div class="flow">
+      <span class="flow-step">Round 1 responses</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step"><em>Manual export to Excel</em></span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Researcher computes means</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Paste scores into @DELPHI JSON</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Module renders feedback</span>
+    </div>
+
+    <h4>Current Component Map</h4>
+    <table>
+      <tr><th>File</th><th>Role</th><th>Lines</th></tr>
+      <tr><td class="term-name">REDCapDelphi.php</td><td>Entry point. Extends AbstractExternalModule. Hooks into survey/data entry pages. Parses @DELPHI tags, fetches previous-round data, passes config to JS.</td><td>145</td></tr>
+      <tr><td class="term-name">config.json</td><td>Module manifest. Declares hooks, version, namespace.</td><td>~20</td></tr>
+      <tr><td class="term-name">scripts/delphi2.js</td><td>Client-side renderer. Reads JS settings, builds HTML tables and ECharts bar charts.</td><td>~400</td></tr>
+      <tr><td class="term-name">scripts/echarts-5.5.6.min.js</td><td>Bundled ECharts library for bar chart rendering.</td><td>vendor</td></tr>
+    </table>
+
+    <h3>1.2 Proposed Architecture (v2.0)</h3>
+    <p>The extension adds an <strong>auto-calculation engine</strong> as a server-side PHP layer. When <code>calc: "auto"</code> is set, the module extracts Round 1 responses, computes consensus metrics, and injects computed JSON into the existing JS renderers.</p>
+
+    <h4>Proposed Data Flow</h4>
+    <div class="flow">
+      <span class="flow-step">Round 1 data in REDCap</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step"><strong>PHP Metrics Engine</strong></span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Structured JSON</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Existing JS renderers + badge</span>
+    </div>
+
+    <h4>Proposed Directory Structure</h4>
+    <pre>REDCap_DelphiModule/
+├── REDCapDelphi.php          ← Modified: adds auto-calc dispatch
+├── config.json               ← Modified: adds project-level settings
+├── lib/
+│   ├── DataExtractor.php     ← <span class="keyword">NEW</span>: fetches Round 1 data from REDCap
+│   ├── MetricsEngine.php     ← <span class="keyword">NEW</span>: orchestrates metric computation
+│   ├── ConsensusRules.php    ← <span class="keyword">NEW</span>: range-consensus rule definitions
+│   ├── StabilityMetrics.php  ← <span class="keyword">NEW</span>: CV, percentage stability
+│   └── MetricsCache.php      ← <span class="keyword">NEW</span>: caching layer
+├── scripts/
+│   ├── delphi2.js            ← Modified: consumes computed JSON
+│   ├── consensus-badge.js    ← <span class="keyword">NEW</span>: renders IN/OUT/UNDETERMINED
+│   └── echarts-5.5.6.min.js  ← Unchanged
+├── tests/
+│   ├── MetricsEngineTest.php
+│   └── ConsensusRulesTest.php
+└── Documents/</pre>
+
+    <h4>Key Design Principles</h4>
+    <ul>
+      <li><strong>Backward compatibility:</strong> Missing or "manual" calc key preserves 100% current behaviour</li>
+      <li><strong>REDCap EM framework compliance:</strong> All data access via <code>REDCap::getData()</code>, no direct SQL</li>
+      <li><strong>No core modifications:</strong> Everything goes through hooks and the External Module API</li>
+      <li><strong>Separation of concerns:</strong> Data extraction, metrics computation, caching, and rendering are distinct classes</li>
+      <li><strong>Incremental delivery:</strong> 5 milestones, each independently testable and deployable</li>
+    </ul>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 2. FILE ANALYSIS ═══ -->
+  <section class="section" id="file-analysis">
+    <h2>2. File-Level Analysis of Current Module</h2>
+
+    <h3>2.1 REDCapDelphi.php — The Entry Point (145 lines)</h3>
+
+    <h4>Hook Implementations</h4>
+    <p><code>redcap_data_entry_form()</code> and <code>redcap_survey_page()</code> both perform identical logic: check the current page is a data entry or survey page with a record ID, then include the ECharts library and delphi2.js, and call <code>process()</code>.</p>
+
+    <h4>process() Method — Core Logic</h4>
+    <ol>
+      <li>Calls <code>CheckForTags()</code> to scan the current instrument's fields for any field whose <code>misc</code> (action tag) column contains <code>@DELPHI</code></li>
+      <li>If found, fetches the current record's data using <code>REDCap::getData()</code> in array format</li>
+      <li>Iterates every field on the current page. For each field containing <code>@DELPHI=</code>:
+        <ul>
+          <li>Extracts the JSON substring after <code>@DELPHI=</code> (stripping any subsequent action tags)</li>
+          <li>Parses the JSON via <code>json_decode()</code></li>
+          <li>Reads the display type (defaults to "single")</li>
+          <li>Resolves the <code>preRound</code> reference using a regex to extract <code>[event][field]</code> piping syntax</li>
+          <li>Looks up the participant's previous-round value from the fetched data</li>
+          <li>Reads the <code>groups[]</code> array (name, score, colour) verbatim from the JSON</li>
+        </ul>
+      </li>
+      <li>Builds a <code>$config</code> array and outputs it as a JavaScript global via <code>setJsSettings()</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Critical observation:</strong> The <code>groups[].score</code> values are read directly from the @DELPHI JSON and passed to the client unchanged. There is <strong>zero server-side computation</strong>. This is the exact insertion point for the auto-calculation engine.
+    </div>
+
+    <h4>preRound Resolution</h4>
+    <p>The regex parses REDCap's piping syntax to extract the event name and field name. It then resolves the event ID via <code>$Proj-&gt;getEventIdUsingUniqueEventName()</code> and looks up the stored value. This mechanism is reused by the auto-calc engine to identify which Round 1 field to aggregate.</p>
+
+    <h3>2.2 config.json — Module Manifest</h3>
+    <p>Declares the module's identity and subscribed hooks. Currently minimal. For v2.0, this file must be extended with project-level settings fields for default stakeholder grouping field, default consensus rule, threshold, exclusion codes, and debug mode toggle.</p>
+
+    <h3>2.3 scripts/delphi2.js — Client-Side Renderer</h3>
+    <ul>
+      <li><strong>single / single-noprev:</strong> Injects a table above the radio button row showing stakeholder group names with coloured cells at the score position</li>
+      <li><strong>single-matrix / single-matrix-noprev:</strong> Same as single but targets matrix-type question layouts</li>
+      <li><strong>bar / matrix-bar:</strong> Creates ECharts bar chart instances showing distribution of responses per group</li>
+    </ul>
+    <p>For auto-calc mode, delphi2.js needs <strong>no structural changes</strong>. The PHP engine will produce output in the same shape. The only addition is the consensus badge renderer.</p>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 3. INTEGRATION ═══ -->
+  <section class="section" id="integration">
+    <h2>3. REDCap Integration Points</h2>
+
+    <h3>3.1 Hook Lifecycle</h3>
+    <p>The module uses two hooks that fire when a survey page or data entry form is being rendered. Both fire after the HTML form has been generated but before the page is sent to the browser, allowing the module to inject JavaScript.</p>
+
+    <h3>3.2 Data Access</h3>
+    <p>The module accesses REDCap data through: (a) the global <code>$Proj</code> object for project metadata, and (b) <code>\REDCap::getData()</code> for record-level data. For auto-calc, getData will be called additionally to fetch <strong>all records</strong> for the Round 1 event/field to compute aggregates.</p>
+
+    <h3>3.3 Action Tag Parsing</h3>
+    <p>Action tags are stored in each field's <code>misc</code> column. The module scans for <code>@DELPHI=</code> using string position search, extracts the JSON between <code>=</code> and the next <code>@</code> character (or end of string), then parses it with <code>json_decode()</code>.</p>
+
+    <h3>3.4 JavaScript Injection</h3>
+    <p>The module outputs <code>&lt;script src&gt;</code> tags for libraries and a <code>&lt;script&gt;REDCapDelphi = {...};&lt;/script&gt;</code> block containing the serialised configuration. The JS file reads this global on DOMContentLoaded and manipulates the form DOM.</p>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 4. IMPLEMENTATION ═══ -->
+  <section class="section" id="implementation">
+    <h2>4. Step-by-Step Implementation Plan</h2>
+
+    <!-- M1 -->
+    <h3>Milestone 1: Current Module Mapped</h3>
+    <p><em>Goal:</em> Verify current module works unchanged; produce technical document.</p>
+
+    <!-- M2 -->
+    <h3>Milestone 2: Auto Mode Computes Basic Summaries</h3>
+    <p><em>Goal:</em> When <code>calc="auto"</code>, compute mean/median/mode from Round 1 data and feed into existing renderers.</p>
+
+    <h4>Step 2.1: Extend config.json with Project Settings</h4>
+    <pre><span class="string">"project-settings"</span>: [
+  { <span class="key">"key"</span>: <span class="string">"stakeholder-field"</span>,
+    <span class="key">"name"</span>: <span class="string">"Default stakeholder grouping field"</span>,
+    <span class="key">"type"</span>: <span class="string">"field-list"</span> },
+  { <span class="key">"key"</span>: <span class="string">"consensus-rule"</span>,
+    <span class="key">"name"</span>: <span class="string">"Default consensus rule"</span>,
+    <span class="key">"type"</span>: <span class="string">"dropdown"</span>,
+    <span class="key">"choices"</span>: [
+      {<span class="string">"value"</span>:<span class="string">"iqr_sd"</span>,<span class="string">"name"</span>:<span class="string">"IQR≤1 &amp; SD≤1.5"</span>},
+      {<span class="string">"value"</span>:<span class="string">"range3"</span>,<span class="string">"name"</span>:<span class="string">"Range Consensus 3"</span>},
+      ... ] },
+  { <span class="key">"key"</span>: <span class="string">"threshold"</span>,
+    <span class="key">"name"</span>: <span class="string">"Default consensus threshold (%)"</span>,
+    <span class="key">"type"</span>: <span class="string">"text"</span>, <span class="key">"default"</span>: <span class="string">"70"</span> },
+  { <span class="key">"key"</span>: <span class="string">"exclude-codes"</span>,
+    <span class="key">"name"</span>: <span class="string">"Exclusion codes (comma-separated)"</span>,
+    <span class="key">"type"</span>: <span class="string">"text"</span>, <span class="key">"default"</span>: <span class="string">"99"</span> },
+  { <span class="key">"key"</span>: <span class="string">"debug-mode"</span>,
+    <span class="key">"name"</span>: <span class="string">"Debug mode (admin only)"</span>,
+    <span class="key">"type"</span>: <span class="string">"checkbox"</span> }
+]</pre>
+
+    <h4>Step 2.2: Create lib/DataExtractor.php</h4>
+    <p>Responsible for fetching Round 1 responses from REDCap:</p>
+    <pre><span class="keyword">class</span> DataExtractor {
+  <span class="keyword">private</span> $projectId;
+  <span class="keyword">private</span> $excludeCodes;
+
+  <span class="keyword">public function</span> extractResponses(
+    <span class="keyword">string</span> $eventName, <span class="keyword">string</span> $fieldName,
+    ?<span class="keyword">string</span> $stakeholderField = <span class="keyword">null</span>
+  ): <span class="keyword">array</span> {
+    $data = \REDCap::getData([
+      <span class="string">'project_id'</span> =&gt; $this-&gt;projectId,
+      <span class="string">'return_format'</span> =&gt; <span class="string">'array'</span>,
+      <span class="string">'fields'</span> =&gt; [$fieldName, $stakeholderField],
+      <span class="string">'events'</span> =&gt; [$eventName],
+    ]);
+    <span class="comment">// Filter empty + excluded, group by stakeholder</span>
+    <span class="comment">// Returns ['overall' =&gt; [...], 'by_group' =&gt; [...]]</span>
+  }
+}</pre>
+
+    <h4>Step 2.3: Create lib/MetricsEngine.php</h4>
+    <pre><span class="keyword">class</span> MetricsEngine {
+  <span class="keyword">public static function</span> computeBasic(<span class="keyword">array</span> $values): <span class="keyword">array</span> {
+    sort($values);
+    $n    = count($values);
+    $mean = array_sum($values) / $n;
+
+    <span class="comment">// Median</span>
+    $mid = (int)($n / 2);
+    $median = ($n % 2 === 0)
+      ? ($values[$mid-1] + $values[$mid]) / 2
+      : $values[$mid];
+
+    <span class="comment">// Mode, IQR, SD, Distribution...</span>
+
+    <span class="keyword">return</span> [
+      <span class="string">'n'</span> =&gt; $n, <span class="string">'mean'</span> =&gt; $mean,
+      <span class="string">'median'</span> =&gt; $median, <span class="string">'mode'</span> =&gt; $mode,
+      <span class="string">'iqr'</span> =&gt; $iqr, <span class="string">'sd'</span> =&gt; $sd,
+      <span class="string">'distribution'</span> =&gt; $distribution,
+    ];
+  }
+}</pre>
+
+    <h4>Step 2.4: Modify REDCapDelphi.php process()</h4>
+    <pre><span class="comment">// Inside the field loop, after json_decode:</span>
+$calcMode = $params[<span class="string">'calc'</span>] ?? <span class="string">'manual'</span>;
+
+<span class="keyword">if</span> ($calcMode === <span class="string">'auto'</span>) {
+  <span class="comment">// Extract data → compute metrics → build groups array</span>
+  $extractor = <span class="keyword">new</span> DataExtractor($project_id, $excludeCodes);
+  $responses = $extractor-&gt;extractResponses($r1Event, $r1Field, $shField);
+  $metrics   = MetricsEngine::computeBasic($responses[<span class="string">'overall'</span>]);
+
+  <span class="comment">// Build groups[] in same shape as manual mode</span>
+  <span class="keyword">foreach</span> ($responses[<span class="string">'by_group'</span>] <span class="keyword">as</span> $name =&gt; $vals) {
+    $gm = MetricsEngine::computeBasic($vals);
+    $groups[<span class="string">'group'</span>][] = [<span class="string">'name'</span>=&gt;$name, <span class="string">'score'</span>=&gt;round($gm[<span class="string">'mean'</span>]), ...];
+  }
+  $groups[<span class="string">'consensus'</span>] = $metrics; <span class="comment">// extra data for badge</span>
+} <span class="keyword">else</span> {
+  <span class="comment">// Existing manual mode (unchanged)</span>
+}</pre>
+
+    <h4>Step 2.5: Output Contract (JSON)</h4>
+    <pre>{
+  <span class="key">"elements"</span>: {
+    <span class="key">"r2_question_field"</span>: {
+      <span class="key">"type"</span>: <span class="string">"single"</span>,
+      <span class="key">"groups"</span>: {
+        <span class="key">"prevscore"</span>: <span class="string">"7"</span>,
+        <span class="key">"group"</span>: [
+          {<span class="key">"name"</span>:<span class="string">"Patients"</span>,<span class="key">"score"</span>:<span class="string">"8"</span>,<span class="key">"colour"</span>:<span class="string">"#2196F3"</span>},
+          {<span class="key">"name"</span>:<span class="string">"Clinicians"</span>,<span class="key">"score"</span>:<span class="string">"6"</span>,<span class="key">"colour"</span>:<span class="string">"#FF9800"</span>}
+        ],
+        <span class="key">"consensus"</span>: {
+          <span class="key">"n"</span>: 47, <span class="key">"mean"</span>: 7.12, <span class="key">"median"</span>: 7,
+          <span class="key">"iqr"</span>: 2, <span class="key">"sd"</span>: 1.83,
+          <span class="key">"status"</span>: <span class="string">"IN"</span>
+        }
+      }
+    }
+  }
+}</pre>
+
+    <!-- M3 -->
+    <h3>Milestone 3: Consensus Rules Implemented</h3>
+    <table>
+      <tr><th>Rule ID</th><th>Logic</th><th>Status Output</th></tr>
+      <tr><td class="term-name">iqr_sd</td><td>IQR ≤ 1 AND SD ≤ 1.5</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">range2</td><td>Divide scale into 2 equal ranges. IN if ≥ threshold% in any range.</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">range3</td><td>Divide into 3 ranges (Low/Med/High). IN if ≥ threshold% in any.</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">range3_hi</td><td>Only highest range qualifies.</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">range3_1570</td><td>≥ threshold% high AND &lt; 15% low.</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+      <tr><td class="term-name">range3_1570_7015</td><td>Bidirectional: IN for high, OUT for low consensus.</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span> / <span class="badge badge-und">UND</span></td></tr>
+      <tr><td class="term-name">majority</td><td>Most votes. Absolute (≥ 50%) or Simple (plurality).</td><td><span class="badge badge-in">IN</span> / <span class="badge badge-out">OUT</span></td></tr>
+    </table>
+
+    <h4>ConsensusRules.php pattern</h4>
+    <pre><span class="keyword">class</span> ConsensusRules {
+  <span class="keyword">public static function</span> evaluate(
+    <span class="keyword">string</span> $rule, <span class="keyword">array</span> $metrics,
+    <span class="keyword">int</span> $scaleMin, <span class="keyword">int</span> $scaleMax,
+    <span class="keyword">float</span> $threshold = 70.0
+  ): <span class="keyword">array</span> {
+    <span class="keyword">return match</span>($rule) {
+      <span class="string">'iqr_sd'</span>  =&gt; self::iqrSd($metrics),
+      <span class="string">'range3'</span>  =&gt; self::rangeConsensus($metrics, $scaleMin, $scaleMax, 3, $threshold, <span class="keyword">false</span>),
+      <span class="string">'range3_hi'</span> =&gt; self::rangeConsensus($metrics, $scaleMin, $scaleMax, 3, $threshold, <span class="keyword">true</span>),
+      <span class="keyword">default</span>   =&gt; [<span class="string">'status'</span> =&gt; <span class="string">'UNDETERMINED'</span>],
+    };
+  }
+}</pre>
+
+    <!-- M4 -->
+    <h3>Milestone 4: Stability Metrics + Status Badge</h3>
+    <pre><span class="keyword">class</span> StabilityMetrics {
+  <span class="comment">/** Coefficient of Variation for rating/ordinal data */</span>
+  <span class="keyword">public static function</span> coefficientOfVariation(<span class="keyword">float</span> $mean, <span class="keyword">float</span> $sd): <span class="keyword">float</span> {
+    <span class="keyword">if</span> ($mean == 0) <span class="keyword">return</span> 100.0;
+    $cv = ($sd / $mean) * 100;
+    <span class="keyword">return</span> round(100 - $cv, 2); <span class="comment">// Group stability = 100% - CV</span>
+  }
+
+  <span class="comment">/** Percentage stability for categorical data */</span>
+  <span class="keyword">public static function</span> percentageStability(
+    <span class="keyword">array</span> $distribution, <span class="keyword">int</span> $consensusChoice, <span class="keyword">int</span> $total
+  ): <span class="keyword">float</span> {
+    $count = $distribution[$consensusChoice] ?? 0;
+    <span class="keyword">return</span> round(($count / $total) * 100, 2);
+  }
+}</pre>
+
+    <h4>Caching Strategy (MetricsCache.php)</h4>
+    <ul>
+      <li><strong>Cache key:</strong> <code>hash(project_id, event, field, stakeholderField, rule, threshold)</code></li>
+      <li><strong>Storage:</strong> REDCap's built-in EM settings via <code>setProjectSetting()</code>/<code>getProjectSetting()</code></li>
+      <li><strong>Invalidation:</strong> Timestamp-based — recompute if project data has been modified since cache was written</li>
+      <li><strong>Batch extraction:</strong> Single <code>getData()</code> call per Round 1 event, then compute per field in memory</li>
+    </ul>
+
+    <!-- M5 -->
+    <h3>Milestone 5: Documentation + Release</h3>
+    <p>Updated README with manual vs auto examples, demo REDCap project XML, test suite, version 2.0 release tag.</p>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 5. VISUALISATION ═══ -->
+  <section class="section" id="visualisation">
+    <h2>5. Visualisation &amp; UX Improvements</h2>
+    <ul>
+      <li><strong>Distribution histograms:</strong> Show frequency distribution per stakeholder group using the distribution array</li>
+      <li><strong>Box plots:</strong> ECharts supports box-and-whisker plots natively. Display Q1, median, Q3, and outliers per group</li>
+      <li><strong>Auto-detect stakeholder groups:</strong> Set once at project level, all auto-mode questions inherit it</li>
+      <li><strong>Batch tag generation:</strong> Provide a utility page that scans Round 1 instruments and generates @DELPHI tags for Round 2 automatically</li>
+      <li><strong>Colour auto-assignment:</strong> Use a predefined palette — researchers only override when they have specific branding needs</li>
+    </ul>
+
+    <h3>Separation of Data Processing and Display</h3>
+    <table>
+      <tr><th>Layer</th><th>Responsibility</th><th>Files</th></tr>
+      <tr><td class="term-name">Data Access</td><td>Fetch responses, apply filters, group by stakeholder</td><td>lib/DataExtractor.php</td></tr>
+      <tr><td class="term-name">Computation</td><td>Mean, median, mode, IQR, SD, distributions, consensus, stability</td><td>lib/MetricsEngine.php, ConsensusRules.php, StabilityMetrics.php</td></tr>
+      <tr><td class="term-name">Caching</td><td>Store/retrieve computed metrics, invalidate on data change</td><td>lib/MetricsCache.php</td></tr>
+      <tr><td class="term-name">Orchestration</td><td>Parse @DELPHI config, dispatch to manual or auto path</td><td>REDCapDelphi.php</td></tr>
+      <tr><td class="term-name">Rendering</td><td>Read JSON, manipulate DOM, render tables/charts/badges</td><td>scripts/delphi2.js, consensus-badge.js</td></tr>
+    </table>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 6. TESTING ═══ -->
+  <section class="section" id="testing">
+    <h2>6. Testing Strategy</h2>
+
+    <h3>Unit Tests</h3>
+    <table>
+      <tr><th>Test Class</th><th>Covers</th><th>Min. Cases</th></tr>
+      <tr><td class="term-name">MetricsEngineTest</td><td>mean, median, mode, IQR, SD, edge cases (empty, single value, even/odd)</td><td>15</td></tr>
+      <tr><td class="term-name">ConsensusRulesTest</td><td>Each rule: data yielding IN, OUT, UNDETERMINED</td><td>3 × 9 = 27</td></tr>
+      <tr><td class="term-name">StabilityMetricsTest</td><td>CV, percentage stability, zero-mean edge case</td><td>6</td></tr>
+      <tr><td class="term-name">DataExtractorTest</td><td>Exclusion filtering, empty datasets, grouping, missing values</td><td>8</td></tr>
+    </table>
+
+    <h3>Example Test Dataset (Range 3, 1–9 scale, 70% threshold)</h3>
+    <table>
+      <tr><th>Scenario</th><th>Data</th><th>Expected</th></tr>
+      <tr><td>IN (high consensus)</td><td>22 of 30 score 7–9 (73.3%)</td><td><span class="badge badge-in">IN</span></td></tr>
+      <tr><td>OUT (spread)</td><td>10 each in Low/Med/High (33%)</td><td><span class="badge badge-out">OUT</span></td></tr>
+      <tr><td>Below threshold</td><td>20 of 30 score 7–9 (66.7%)</td><td><span class="badge badge-out">OUT</span></td></tr>
+    </table>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 7. RISKS ═══ -->
+  <section class="section" id="risks">
+    <h2>7. Risks &amp; Constraints</h2>
+    <table>
+      <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+      <tr><td>Performance (1000+ records)</td><td>Slow page load</td><td>Batch extraction, caching, compute only needed fields</td></tr>
+      <tr><td>REDCap version compat</td><td>Future API changes</td><td>Use only documented API methods; pin EM framework version</td></tr>
+      <tr><td>Breaking existing projects</td><td>Manual tags stop working</td><td>calc default is "manual"; manual code path untouched</td></tr>
+      <tr><td>Data privacy</td><td>Individual data leaks</td><td>Never send record IDs or raw rows to client</td></tr>
+      <tr><td>Cache staleness</td><td>Outdated feedback shown</td><td>Timestamp-based invalidation; debug mode shows age</td></tr>
+      <tr><td>Misconfigured rule</td><td>Misleading consensus</td><td>Project defaults + per-question overrides; debug logging</td></tr>
+    </table>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+  <!-- ═══ 8. TIMELINE ═══ -->
+  <section class="section" id="timeline">
+    <h2>8. Milestone Timeline</h2>
+
+    <div class="milestone">
+      <span class="milestone-time">1 week</span>
+      <div class="milestone-label">M1: Module Mapped</div>
+      <p>Technical note + verified local install</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">2–3 weeks</span>
+      <div class="milestone-label">M2: Basic Auto Summaries</div>
+      <p>DataExtractor + MetricsEngine + modified process()</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">2 weeks</span>
+      <div class="milestone-label">M3: Consensus Rules</div>
+      <p>ConsensusRules.php + all rule implementations + tests</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">1–2 weeks</span>
+      <div class="milestone-label">M4: Stability + Badge</div>
+      <p>StabilityMetrics + JS badge + caching + config settings</p>
+    </div>
+    <div class="milestone">
+      <span class="milestone-time">1 week</span>
+      <div class="milestone-label">M5: Docs + Release</div>
+      <p>README, demo project, test suite, version bump</p>
+    </div>
+
+    <div class="callout">
+      <strong>Total: 7–10 weeks.</strong> M2 alone provides significant value by eliminating the Excel dependency.
+    </div>
+
+    <a href="#top" class="back-link">↑ Back to top</a>
+  </section>
+
+</div>
+</body>
+</html>
